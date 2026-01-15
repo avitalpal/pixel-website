@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Modal from "../shared-components/Modal";
 import Inventory from "./components/Inventory";
 import EggCounter from "./components/EggCounter";
+import SwitchSite from "../shared-components/SwitchSite";
 
 // Dynamically load Phaser wrapper only in browser
 const GameClient = dynamic(() => import("./game/GameClient"), { ssr: false });
@@ -50,22 +51,27 @@ export default function GamifiedPage() {
 
   if (!isLargeScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-100 text-center px-6">
+      <div className="md:hidden min-h-screen flex flex-col gap-8 items-center justify-center bg-stone-100 text-center px-6">
         <p className="pixel-font text-stone-700">
-          Game mode is available on larger screens only.
+          Game mode isn't available on mobile right now, sorry!
         </p>
+         <SwitchSite destination="website" />
       </div>
     );
   }
 
   return (
     <>
-      <div className="fixed inset-0 bg-black overflow-hidden">
+      <div className="fixed inset-0 bg-transparent overflow-hidden">
         <GameClient />
       </div>
 
       <EggCounter collected={eggs} total={TOTAL_EGGS} />
       <Inventory items={inventory} />
+
+      <div className="fixed bottom-4 right-4 z-40">
+        <SwitchSite destination="website" />
+      </div>
 
       {activeModal === "book" && (
         <Modal title="Journal" onClose={() => setActiveModal(null)}>

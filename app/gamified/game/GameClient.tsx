@@ -5,34 +5,35 @@ import * as Phaser from "phaser";
 import MainScene from "./player";
 
 export default function GameClient() {
-  const gameRef = useRef<Phaser.Game | null>(null);
+    const gameRef = useRef<Phaser.Game | null>(null);
 
-  useEffect(() => {
-    if (gameRef.current) return; // prevent double init
+    useEffect(() => {
+        if (gameRef.current) return; // prevent double init
 
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      parent: "game-root",
-      backgroundColor: "#1c1917",
-      physics: {
-        default: "arcade",
-        arcade: { debug: false },
-      },
-      scene: [MainScene],
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-      },
-    };
+        const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'game-root',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0, x: 0 }
+                }
+            },
+            scene: MainScene,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
 
-    gameRef.current = new Phaser.Game(config);
+        gameRef.current = new Phaser.Game(config);
 
-    return () => {
-      gameRef.current?.destroy(true);
-    };
-  }, []);
+        // return () => {
+        //     gameRef.current?.destroy(true);
+        // };
+    }, []);
 
-  return <div id="game-root" className="w-full h-full" />;
+    return <div id="game-root" className="fixed inset-0 z-0" />;
 }
