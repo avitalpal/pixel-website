@@ -1,0 +1,27 @@
+import * as Phaser from "phaser";
+import MainScene from "./player";
+
+let game: Phaser.Game | null = null;
+
+export function startGame(containerId: string) {
+  if (game) return; // prevent double init (VERY important in React)
+
+  game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: containerId,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: "#1c1917", // stone-900
+    physics: {
+      default: "arcade",
+      arcade: {
+        debug: false,
+      },
+    },
+    scene: [MainScene],
+    scale: {
+      mode: Phaser.Scale.RESIZE,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+  });
+}
