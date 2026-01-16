@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <div className="hidden lg:flex min-h-screen items-center justify-center bg-[url('/backgrounds/landing-bg.jpg')] bg-cover">
-      <div className="flex flex-col items-center gap-6 pixel-font bg-gray-100 p-8 rounded-lg shadow-lg max-w-1/2 text-center">
+      <div className="flex flex-col items-center gap-6 pixel-font bg-gray-100 px-8 py-12 rounded-lg shadow-lg max-w-1/2 text-center">
         <h1 className="text-5xl font-bold text-blue-500">WELCOME</h1>
         <h3 className="text-2xl font-bold text-blue-500">to my personal website!</h3>
 
