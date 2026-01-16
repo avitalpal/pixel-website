@@ -14,6 +14,7 @@ type JournalId = keyof typeof journalData;
 
 import SwitchSite from "../shared-components/SwitchSite";
 import HelpButton from "./components/HelpButton";
+import AssetCredit from "./components/AssetCredit";
 
 // Dynamically load Phaser wrapper only in browser
 const GameClient = dynamic(() => import("./game/GameClient"), { ssr: false });
@@ -108,6 +109,7 @@ export default function GamifiedPage() {
 
             <Inventory items={inventory} />
             <HelpButton />
+            <AssetCredit />
 
             <div className="fixed bottom-4 right-4 z-40">
                 <SwitchSite destination="website" />

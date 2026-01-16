@@ -24,6 +24,8 @@ export default class MainScene extends Phaser.Scene {
     private journals: Journal[] = [];
     private gems: Phaser.Physics.Arcade.Sprite[] = [];
 
+    // At the top of your MainScene class:
+    private isModalOpen: boolean = false;
 
     constructor() {
         super("MainScene");
@@ -38,6 +40,13 @@ export default class MainScene extends Phaser.Scene {
 
     create() {
         this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
+        window.addEventListener("modal-open", () => {
+            this.isModalOpen = true;
+        });
+        window.addEventListener("modal-close", () => {
+            this.isModalOpen = false;
+        });
 
         // Fill background
         for (let y = 0; y < MAP_HEIGHT; y++) {
@@ -56,13 +65,18 @@ export default class MainScene extends Phaser.Scene {
 
         // --- Gems ---
         const gemPositions = [
-            { x: WORLD_WIDTH / 2 - 120, y: WORLD_HEIGHT / 2 },
-            { x: WORLD_WIDTH / 2 + 200, y: WORLD_HEIGHT / 2 - 100 }
+            { x: WORLD_WIDTH / 2 - 120, y: WORLD_HEIGHT / 2, name: "Gem A" },
+            { x: WORLD_WIDTH / 2 + 200, y: WORLD_HEIGHT / 2 - 100, name: "Gem B" },
         ];
+
         gemPositions.forEach((pos) => {
             const gem = this.physics.add.sprite(pos.x, pos.y, "player");
             gem.setTint(0x38bdf8);
             gem.setImmovable(true);
+
+            // attach a name to the sprite
+            (gem as any).itemName = pos.name;
+
             this.gems.push(gem);
         });
 
@@ -126,7 +140,13 @@ export default class MainScene extends Phaser.Scene {
     }
 
     update() {
-        const speed = 200;
+        if (this.isModalOpen) {
+            // Stop the player
+            this.player.setVelocity(0, 0);
+            return; // Skip the rest of update
+        }
+
+        const speed = 250;
         let vx = 0, vy = 0;
 
         if (this.cursors.left.isDown || this.wasd.A.isDown) vx = -speed;
@@ -157,10 +177,20 @@ export default class MainScene extends Phaser.Scene {
         });
 
         // Check gem pickups
-        this.gems.forEach(gem => {
-            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, gem.x, gem.y);
+        this.gems.forEach((gem) => {
+            const dist = Phaser.Math.Distance.Between(
+                this.player.x,
+                this.player.y,
+                gem.x,
+                gem.y
+            );
+
             if (dist < 30) {
-                window.dispatchEvent(new CustomEvent("pickup-item", { detail: "Gem" }));
+                window.dispatchEvent(
+                    new CustomEvent("pickup-item", {
+                        detail: (gem as any).itemName,
+                    })
+                );
                 gem.destroy();
             }
         });
