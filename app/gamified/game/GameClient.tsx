@@ -4,19 +4,20 @@ import { useEffect, useRef } from "react";
 import * as Phaser from "phaser";
 import MainScene from "./player";
 
-export default function GameClient() {
+export default function GameClient({ active }: { active: boolean }) {
     const gameRef = useRef<Phaser.Game | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (gameRef.current) return; // prevent double init
+        if (gameRef.current) return; // already created
 
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
             width: window.innerWidth,
             height: window.innerHeight,
-            parent: 'game-root',
+            parent: containerRef.current!,
             physics: {
-                default: 'arcade',
+                default: "arcade",
                 arcade: {
                     gravity: { y: 0, x: 0 }
                 }
@@ -30,10 +31,19 @@ export default function GameClient() {
 
         gameRef.current = new Phaser.Game(config);
 
-        // return () => {
-        //     gameRef.current?.destroy(true);
-        // };
+        // Only destroy on full unmount
+        return () => {
+            gameRef.current?.destroy(true, false);
+            gameRef.current = null;
+        };
     }, []);
 
-    return <div id="game-root" className="fixed inset-0 z-0" />;
+    // Just hide/show instead of destroying
+    return (
+        <div
+            ref={containerRef}
+            style={{ display: active ? "block" : "none" }}
+            className="fixed inset-0 z-0"
+        />
+    );
 }

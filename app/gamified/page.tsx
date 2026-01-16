@@ -99,7 +99,7 @@ export default function GamifiedPage() {
     return (
         <>
             <div className="fixed inset-0 bg-transparent overflow-hidden">
-                <GameClient />
+                <GameClient active={isLargeScreen} />
             </div>
 
             <div className="fixed top-4 left-4 z-40 flex flex-col gap-1 pixel-font text-sm text-stone-800">
