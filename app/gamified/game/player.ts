@@ -124,9 +124,19 @@ export default class MainScene extends Phaser.Scene {
         const groundDetails = map.createLayer("Ground_details", tilesList, 0, 0);
         const boundariesLayer = map.createLayer("Boundaries_terrain", tilesList, 0, 0);
 
-        // [baseLayer, groundDetails, boundariesLayer].forEach(layer => {
-        //     layer!.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-        // });
+        [
+            "Grass",
+            "Fences",
+            "Hills",
+            "Wooden House",
+            "Wooden_House_Walls_Tilset",
+            "Tilled_Dirt",
+            "Tilled Dirt"
+        ].forEach(key => {
+            this.textures.get(key).setFilter(
+                Phaser.Textures.FilterMode.NEAREST
+            );
+        });
 
         // Optional: adjust rendering order
         baseLayer!.setDepth(0);
@@ -284,6 +294,7 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.cameras.main.setZoom(3); // <-- THIS replaces layer scaling
+        this.cameras.main.roundPixels = true;
 
     }
 
