@@ -96,6 +96,12 @@
          "locked":true,
          "name":"Base_ground",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"collides",
+                 "type":"bool",
+                 "value":false
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":80,
@@ -285,6 +291,12 @@
          "id":5,
          "name":"Boundaries_terrain",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"collides",
+                 "type":"bool",
+                 "value":true
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":80,

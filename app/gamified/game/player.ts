@@ -7,6 +7,7 @@ type Journal = {
     sprite: Phaser.Physics.Arcade.Sprite;
     indicator: Phaser.GameObjects.Image;
     opened: boolean;
+    hovering?: boolean; // track hover animation
 };
 
 
@@ -45,10 +46,10 @@ export default class MainScene extends Phaser.Scene {
             "/objects/Egg_item.png"
         );
 
-        this.load.image(
-            "chest",
-            "/objects/Chest.png"
-        );
+        this.load.spritesheet("chest", "/objects/Chest.png", {
+            frameWidth: 48,
+            frameHeight: 48,
+        });
 
         // Tilesets
         this.load.image(
@@ -94,30 +95,17 @@ export default class MainScene extends Phaser.Scene {
 
 
         // Add tilesets
-        const grassTiles = map.addTilesetImage("Grass", "Grass");
-        if (!grassTiles) throw new Error("Tileset 'Grass' not found! Check your Tiled tileset name");
-        const fencesTiles = map.addTilesetImage("Fences", "Fences");
-        if (!fencesTiles) throw new Error("Tileset 'Fences' not found! Check your Tiled tileset name");
-        const hillsTiles = map.addTilesetImage("Hills", "Hills");
-        if (!hillsTiles) throw new Error("Tileset 'Hills' not found! Check your Tiled tileset name");
-        const woodenHouseTiles = map.addTilesetImage("Wooden House", "Wooden House");
-        if (!woodenHouseTiles) throw new Error("Tileset 'Wooden House' not found! Check your Tiled tileset name");
-        const woodenWallsTiles = map.addTilesetImage("Wooden_House_Walls_Tilset", "Wooden_House_Walls_Tilset");
-        if (!woodenWallsTiles) throw new Error("Tileset 'Wooden_House_Walls_Tilset' not found! Check your Tiled tileset name");
-        const tilledDirtTiles = map.addTilesetImage("Tilled_Dirt", "Tilled_Dirt");
-        if (!tilledDirtTiles) throw new Error("Tileset 'Tilled_Dirt' not found! Check your Tiled tileset name");
-        const tilledDirt2Tiles = map.addTilesetImage("Tilled Dirt", "Tilled Dirt");
-        if (!tilledDirt2Tiles) throw new Error("Tileset 'Tilled Dirt' not found! Check your Tiled tileset name");
-
         const tilesList = [
-            grassTiles,
-            fencesTiles,
-            hillsTiles,
-            woodenHouseTiles,
-            woodenWallsTiles,
-            tilledDirtTiles,
-            tilledDirt2Tiles
+            map.addTilesetImage("Grass", "Grass")!,
+            map.addTilesetImage("Fences", "Fences")!,
+            map.addTilesetImage("Hills", "Hills")!,
+            map.addTilesetImage("Wooden House", "Wooden House")!,
+            map.addTilesetImage("Wooden_House_Walls_Tilset", "Wooden_House_Walls_Tilset")!,
+            map.addTilesetImage("Tilled_Dirt", "Tilled_Dirt")!,
+            map.addTilesetImage("Tilled Dirt", "Tilled Dirt")!,
         ];
+
+        if (tilesList.some(t => !t)) throw new Error("One or more tilesets failed to load");
 
         // Create layers
         const baseLayer = map.createLayer("Base_ground", tilesList, 0, 0);
@@ -143,15 +131,12 @@ export default class MainScene extends Phaser.Scene {
         groundDetails!.setDepth(0);
         boundariesLayer!.setDepth(2);
 
-        // COLLISION
-        boundariesLayer!.setCollisionByProperty({ collides: true });
-
         this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
 
         // --- Player ---
         this.player = this.physics.add.sprite(
-            worldWidth / 2,
-            worldHeight / 2,
+            worldWidth / 2 - TILE_SIZE * 1.25,
+            worldHeight / 2 + TILE_SIZE,
             "player",
             0 // frame index
         );
@@ -159,13 +144,27 @@ export default class MainScene extends Phaser.Scene {
 
         // Resize the collision box to be smaller than the sprite
         this.player.body!.setSize(16, 16);
+        const buffer = TILE_SIZE; // 1 tile
+        this.physics.world.setBounds(
+            buffer,                   // x
+            buffer,                   // y
+            worldWidth - 2 * buffer,  // width
+            worldHeight - 2 * buffer  // height
+        );
+
+        // Enable collideWorldBounds so player stops at these bounds
+
+        boundariesLayer!.setCollisionByExclusion([-1]);
 
         this.player.setCollideWorldBounds(true);
+
         this.physics.add.collider(this.player, boundariesLayer!);
 
         this.player.setOrigin(0.5, 0.5);
 
         this.textures.get("player").setFilter(Phaser.Textures.FilterMode.NEAREST);
+
+        // COLLISION
 
         // --- Corrected Animations ---
         this.anims.create({
@@ -247,9 +246,10 @@ export default class MainScene extends Phaser.Scene {
 
         positions.forEach((j) => {
             const sprite = this.physics.add.sprite(j.x, j.y, "chest");
-            sprite.setTint(0xfacc15);
-            sprite.setImmovable(true);
             sprite.setDepth(2);
+            sprite.setImmovable(true);
+            sprite.setTint(0xfacc15);
+            sprite.play("chest-rest"); // start resting frame
 
             const indicator = this.add
                 .image(j.x, j.y - 24, "keyE")
@@ -260,13 +260,8 @@ export default class MainScene extends Phaser.Scene {
                 Phaser.Textures.FilterMode.NEAREST
             );
 
-            this.tweens.add({
-                targets: indicator,
-                y: indicator.y - 6,   // how high it bounces
-                duration: 600,
-                yoyo: true,
-                repeat: -1,
-                ease: "Sine.easeInOut"
+            this.journals.forEach(j => {
+                j.hovering = false;
             });
 
             this.journals.push({
@@ -277,12 +272,42 @@ export default class MainScene extends Phaser.Scene {
             });
         });
 
+        // Chest idle (resting) frame
+        this.anims.create({
+            key: "chest-rest",
+            frames: [{ key: "chest", frame: 1 }],
+        });
+
+        // Chest "near player" blink/hover (switch 0 <-> 1)
+        this.anims.create({
+            key: "chest-hover",
+            frames: this.anims.generateFrameNumbers("chest", { frames: [0, 1] }),
+            frameRate: 4,
+            repeat: -1,
+        });
+
+        // Chest open: 1 -> 2 -> 4
+        this.anims.create({
+            key: "chest-open",
+            frames: this.anims.generateFrameNumbers("chest", { frames: [1, 2, 4] }),
+            frameRate: 6,
+            repeat: 0
+        });
+
+        // Chest close: 4 -> 2 -> 1
+        this.anims.create({
+            key: "chest-close",
+            frames: this.anims.generateFrameNumbers("chest", { frames: [4, 2, 1] }),
+            frameRate: 6,
+            repeat: 0
+        });
+
         this.textures.get("chest").setFilter(Phaser.Textures.FilterMode.NEAREST);
 
         // --- Eggs ---
         this.spawnEgg(300, 300);
         this.spawnEgg(800, 600);
-        this.spawnEgg(1600, 400);
+        this.spawnEgg(100, 400);
 
         this.textures.get("egg").setFilter(Phaser.Textures.FilterMode.NEAREST);
 
@@ -372,12 +397,44 @@ export default class MainScene extends Phaser.Scene {
 
             j.indicator.setVisible(d < 30);
 
-            if (d < 30 && Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-                window.dispatchEvent(
-                    new CustomEvent("open-journal", { detail: { id: j.id } })
-                );
-                j.opened = true;
+            if (d < 30 && !j.opened) {
+                if (!j.hovering) {
+                    j.sprite.play("chest-hover");
+                    j.hovering = true;
+                }
+
+                if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+                    j.sprite.play("chest-open");
+                    j.opened = true;
+
+                    // Wait for animation before opening modal
+                    j.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                        setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent("open-journal", { detail: { id: j.id } }));
+                        }, 100);
+                    });
+                }
+            } else if (d >= 30 && !j.opened) {
+                j.hovering = false;
+                j.sprite.play("chest-rest");
             }
+
+            window.addEventListener("modal-close", () => {
+                this.isModalOpen = false;
+
+                this.journals.forEach(j => {
+                    if (j.opened) {
+                        setTimeout(() => {
+                            j.sprite.play("chest-close");
+                            j.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+                                j.sprite.play("chest-rest");
+                                j.opened = false;
+                            });
+                        }, 500);
+                    }
+                });
+            });
+
         });
 
     }
