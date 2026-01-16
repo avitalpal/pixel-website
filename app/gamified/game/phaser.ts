@@ -11,7 +11,9 @@ export function startGame(containerId: string) {
     parent: containerId,
     width: window.innerWidth,
     height: window.innerHeight,
-    backgroundColor: "#1c1917", // stone-900
+    pixelArt: true,   // ✅ crucial for crisp pixels
+    roundPixels: true,
+    backgroundColor: "#FFFFFF",
     physics: {
       default: "arcade",
       arcade: {

@@ -82,7 +82,7 @@ export default function Modal({
                         <button
                             onClick={() => setPage((p) => p - 1)}
                             disabled={page === 0}
-                            className={`px-3 py-1 border-1 border-blue-200 text-blue-500 rounded-lg shadow-sm bg-gray-100 text-xl transition
+                            className={`px-3 py-1 border border-blue-200 text-blue-500 rounded-lg shadow-sm bg-gray-100 text-xl transition
                 ${page === 0 ? "opacity-0 pointer-events-none" : "hover:bg-stone-200 hover:cursor-pointer"}
               `}
                         >
@@ -96,7 +96,7 @@ export default function Modal({
                         <button
                             onClick={() => setPage((p) => p + 1)}
                             disabled={page === pages.length - 1}
-                            className={`px-3 py-1 border-1 border-blue-200 text-blue-500 rounded-lg shadow-sm bg-gray-100 text-xl transition
+                            className={`px-3 py-1 border border-blue-200 text-blue-500 rounded-lg shadow-sm bg-gray-100 text-xl transition
                 ${page === pages.length - 1 ? "opacity-0 pointer-events-none" : "hover:bg-stone-200 hover:cursor-pointer"}
               `}
                         >
