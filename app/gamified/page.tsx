@@ -16,13 +16,15 @@ import SwitchSite from "../shared-components/SwitchSite";
 import HelpButton from "./components/HelpButton";
 import AssetCredit from "./components/AssetCredit";
 
+import { InventoryItem, INVENTORY_ITEM_REGISTRY } from "./components/inventory-types";
+
 // Dynamically load Phaser wrapper only in browser
 const GameClient = dynamic(() => import("./game/GameClient"), { ssr: false });
 
 export default function GamifiedPage() {
     const [isLargeScreen, setIsLargeScreen] = useState(false);
     const [activeModal, setActiveModal] = useState<null | "book">(null);
-    const [inventory, setInventory] = useState<string[]>([]);
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
     const [eggs, setEggs] = useState(0);
     const [hasEggModalBeenShown, setHasEggModalBeenShown] = useState(false);
@@ -68,13 +70,17 @@ export default function GamifiedPage() {
 
     useEffect(() => {
         const pickupItem = (e: Event) => {
-            const item = (e as CustomEvent<string>).detail;
-            setInventory((prev) => {
+            const itemId = (e as CustomEvent<keyof typeof INVENTORY_ITEM_REGISTRY>).detail;
+            const item = INVENTORY_ITEM_REGISTRY[itemId];
+            if (!item) return;
+
+            setInventory(prev => {
+                if (prev.some(i => i.name === item.name)) return prev;
                 if (prev.length >= 4) return prev;
-                if (prev.includes(item)) return prev;
                 return [...prev, item];
             });
         };
+
         window.addEventListener("pickup-item", pickupItem);
         return () => window.removeEventListener("pickup-item", pickupItem);
     }, []);

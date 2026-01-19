@@ -4,6 +4,11 @@ import ChickenHouse from "../components/ChickenHouse";
 import Cows from "../components/Cow";
 import Chickens from "../components/Chicken";
 
+import { InventoryItem, INVENTORY_ITEM_REGISTRY, InventoryItemId, INVENTORY_PICKUPS } from "../components/inventory-types";
+
+import { randomPopulate } from "../components/RandomPopulate";
+import { OBJECT_FRAMES, RandomObjectKey } from "../components/RandomPopulate";
+
 const TILE_SIZE = 32;
 
 type ChestState = "rest" | "hover" | "open" | "closing";
@@ -125,6 +130,13 @@ export default class MainScene extends Phaser.Scene {
             frameHeight: 32,
         });
 
+        // Inventory items
+        INVENTORY_PICKUPS.forEach(item => {
+            this.load.image(item.key, `/${item.key}.png`);
+        });
+
+        // Random populate
+        this.load.image("grass_biome", "/objects/Basic_Grass_Biom_things.png");
     }
 
     create() {
@@ -317,7 +329,7 @@ export default class MainScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
 
         // --- Animals ---
-        
+
         const collidables: (Phaser.Tilemaps.TilemapLayer | Phaser.GameObjects.GameObject)[] = [
             boundariesLayer!,          // tile collision
             house1, house2, house3, house4, house5, house6, house7,
@@ -329,29 +341,62 @@ export default class MainScene extends Phaser.Scene {
         // Spawn chickens
         new Chickens(this, 20, collidables); // spawn chickens randomly
 
-        // --- Gems ---
-        const gemPositions = [
-            { x: worldWidth / 2 - 120, y: worldHeight / 2, name: "Gem A" },
-            { x: worldWidth / 2 + 200, y: worldHeight / 2 - 100, name: "Gem B" },
-        ];
+        // --- Inventory ---
+        INVENTORY_PICKUPS.forEach(item => {
+            const pos = item.x !== undefined && item.y !== undefined
+                ? { x: item.x, y: item.y }
+                : { x: 500, y: 500 }; // your existing logic
 
-        gemPositions.forEach((pos) => {
-            const gem = this.physics.add.sprite(pos.x, pos.y, "egg");
-            gem.setTint(0x38bdf8);
-            gem.setImmovable(true);
-            (gem as any).itemName = pos.name;
+            const sprite = this.physics.add.sprite(pos.x, pos.y, item.key);
 
-            this.gems.push(gem);
+            sprite.setDisplaySize(16, 16);
+            this.textures.get(item.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 
-            this.physics.add.overlap(this.player, gem, (player, gem) => {
-                window.dispatchEvent(
-                    new CustomEvent("pickup-item", { detail: (gem as any).itemName })
+            sprite.setData("itemId", item.key);
+            sprite.setImmovable(true);
+
+            // --- Create a shadow ellipse under the sprite ---
+            const shadow = this.add.circle(pos.x, pos.y + 8, 8, 0x000000, 0.4);
+            shadow.setAlpha(0.4);
+            shadow.setDisplaySize(14, 6);
+
+            (shadow as any).isShadow = true;
+            (sprite as any).isPickup = true;
+
+            // --- Bounce tween ---
+            const bounceHeight = 4;
+            const bounceDuration = 500;
+
+            this.tweens.add({
+                targets: sprite,
+                y: sprite.y - bounceHeight,
+                duration: bounceDuration,
+                repeat: -1,
+                yoyo: true,
+                ease: "Power1",
+                onUpdate: () => {
+                    const height = pos.y - sprite.y; // 0 → bounceHeight
+                    const t = Phaser.Math.Clamp(height / bounceHeight, 0, 1);
+
+                    // Shadow shrinks/fades as sprite rises
+                    shadow.scaleX = 1 - 0.2 * t;     // wider
+                    shadow.alpha = 0.4 * (1 - 0.3 * t); // more visible
+                    shadow.y = pos.y + 8 + t * 2;    // slightly below sprite
+                    shadow.y = pos.y + 8 + t * 2; // optionally push shadow down slightly
+                }
+            });
 
 
-                );
-                gem.destroy();
+            // remove both sprite and its FX when collected
+            this.physics.add.overlap(this.player, sprite, () => {
+                // emit pickup event
+                window.dispatchEvent(new CustomEvent<InventoryItemId>("pickup-item", { detail: item.key }));
+
+                shadow.destroy();
+                sprite.destroy();
             });
         });
+
 
         // --- Journals ---
         // Chest idle (resting) frame
@@ -438,11 +483,38 @@ export default class MainScene extends Phaser.Scene {
         this.textures.get("chest").setFilter(Phaser.Textures.FilterMode.NEAREST);
 
         // --- Eggs ---
-        this.spawnEgg(300, 300);
-        this.spawnEgg(800, 600);
+        this.spawnEgg(350, 150);
+        this.spawnEgg(850, 700);
         this.spawnEgg(100, 400);
 
         this.textures.get("egg").setFilter(Phaser.Textures.FilterMode.NEAREST);
+
+        // --- Random Populate ---
+        console.log("🎨 Starting random population...");
+        console.log("📋 Collidables array:", collidables.length, collidables);
+
+        const decorationSprites = randomPopulate({
+            scene: this,
+            map: map,
+            collidables: collidables,
+            tilesetKey: "grass_biome",
+            density: 0.04
+        });
+
+        console.log("🎊 randomPopulate returned:", decorationSprites.length, "sprites");
+
+        // Set depth once for each decoration
+        decorationSprites.forEach((s, idx) => {
+            (s as any).isDecoration = true;
+            if (idx < 5) { // Log first 5
+                console.log(`  Decoration ${idx}: visible=${s.visible}, depth=${s.depth}, pos=(${s.x}, ${s.y})`);
+            }
+        });
+
+        console.log("✅ Random population setup complete!");
+        console.log("   Total decorations created:", decorationSprites.length);
+        // Set depth once for each decoration
+        decorationSprites.forEach(s => { (s as any).isDecoration = true; });
 
         // --- Input ---
         this.cursors = this.input.keyboard!.createCursorKeys();
@@ -458,12 +530,42 @@ export default class MainScene extends Phaser.Scene {
 
     private spawnEgg(x: number, y: number) {
         const egg = this.physics.add.sprite(x, y, "egg");
-        egg.setTint(0xf472b6);
         egg.setImmovable(true);
+
+        const shadow = this.add.circle(x, y + 8, 6, 0x000000, 0.4);
+        shadow.setAlpha(0.4);
+        shadow.setDisplaySize(14, 6);
+
+        (shadow as any).isShadow = true;
+        (egg as any).isPickup = true;
+
+        // --- Bounce tween ---
+        const bounceHeight = 4;
+        const bounceDuration = 500;
+        const baseY = egg.y; // store starting y
+
+        this.tweens.add({
+            targets: egg,
+            y: baseY - bounceHeight,
+            duration: bounceDuration,
+            repeat: -1,
+            yoyo: true,
+            ease: "Power1",
+            onUpdate: () => {
+                const height = baseY - egg.y; // how high egg is above starting position
+                const t = Phaser.Math.Clamp(height / bounceHeight, 0, 1);
+
+                // Shadow shrinks/fades as sprite rises
+                shadow.scaleX = 1 - 0.2 * t;
+                shadow.alpha = 0.4 * (1 - 0.3 * t);
+                shadow.y = baseY + 8 + t * 2;
+            }
+        });
 
         this.physics.add.overlap(this.player, egg, () => {
             window.dispatchEvent(new Event("collect-egg"));
             egg.destroy();
+            shadow.destroy();
 
             // Play celebration animation
             this.player.play("celebrate", true);
@@ -519,16 +621,24 @@ export default class MainScene extends Phaser.Scene {
         }
 
         this.children.each(child => {
-            // 1. Dynamic Depth Sorting for all sprites
-            this.children.each(child => {
-                if (child instanceof Phaser.GameObjects.Sprite && !(child as any).isPath) {
-                    // We set depth to Y so that items lower on screen are "closer"
+            if (child instanceof Phaser.GameObjects.Sprite && !(child as any).isPath) {
+                if ((child as any).isShadow) {
+                    // Keep shadow exactly 1 unit behind its Y position
+                    child.setDepth(child.y - 1);
+                } 
+                else if ((child as any).isDecoration) {
+                    // Decorations keep their pre-calculated depth (already set during creation)
+                    // Don't modify it here - it was calculated based on visual height
+                }
+                else {
+                    // Standard Y-sorting for other sprites
                     child.setDepth(child.y);
                 }
-            });
-            // 2. Force the Player and Chests to be slightly in front if at the exact same Y
-            this.player.setDepth(this.player.y + 1);
+            }
         });
+
+        // Player should be slightly above decorations/objects at the same Y
+        this.player.setDepth(this.player.y + 0.5);
 
         // Check journal interaction
         this.journals.forEach(j => {
