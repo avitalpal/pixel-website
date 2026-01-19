@@ -1,0 +1,127 @@
+{
+    "navigation": {
+        "home": "Home",
+        "about": "About",
+        "projects": "Projects",
+        "funFacts": "Fun Facts",
+        "contact": "Contact"
+    },
+    "landingSection": {
+        "title": "Avital Palchik",
+        "subtitle1": "Full-Stack Developer & Frontend Specialist",
+        "subtitle2": "Systems Design Engineering @ UWaterloo",
+        "summary": {
+            "part1": "Hi! I'm Avital, a passionate developer focused on creating engaging web experiences. Welcome to my personal website, where you can explore my projects and learn more about me.",
+            "part2": "Feel free to navigate around, and don't forget to try out the game mode for a fun twist on the usual browsing experience!",
+            "part3": "A bit about me: I'm currently in my fifth co-op term at the University of Waterloo, studying Systems Design Engineering. I'm passionate about working with and improving User Interfaces, learning new technologies, and developing Reusable Code Architecture.",
+            "part4": "To keep the rest brief:",
+            "experience": [
+                "4+ years with ReactJS, Next.js, and Node.js",
+                "4+ years with TypeScript, JavaScript, HTML, CSS",
+                "3+ years with Python, C++",
+                "Highly familiar with RESTful APIs, TailwindCSS, Git, Agile workflows",
+                "Comfortable with Figma, Photoshop, and UI/UX design principles",
+                "Actively expanding backend & machine learning experience"
+            ]
+        }
+    },
+    "aboutSection": {
+        "title": "About Me",
+        "subtitle": "I enjoy building thoughtful, interactive web experiences with a strong focus on frontend development. Currently in my fifth co-op term and graduating soon, I’ve spent the last few years working with React, TypeScript, and modern web tools.",
+        "card1": {
+            "title": "User-Centered Engineering",
+            "content": "I like building interfaces that feel clear, responsive, and easy to use. My goal is always to turn real user needs into clean, scalable UI that works well across devices.",
+            "prioritiesDetail": {
+                "title": "How I Approach UI",
+                "list": [
+                    "Building reusable, maintainable components that grow with the product",
+                    "Keeping accessibility, usability, and visual clarity in mind from the start",
+                    "Designing mobile-first layouts that adapt naturally to larger screens",
+                    "Thinking about performance early instead of treating it as a last step"
+                ]
+            }
+        },
+        "card2": {
+            "title": "Learning by Building",
+            "content": "I approach frontend work with a full-stack mindset. Having experience with backend systems and APIs helps me build frontend features that are more reliable, efficient, and easier to maintain.",
+            "prioritiesDetail": {
+                "title": "What I Bring to the Table",
+                "list": [
+                    "Hands-on experience with React, Next.js, TypeScript, HTML, CSS, and modern JavaScript",
+                    "Backend exposure using Node.js, Python, C++, and RESTful APIs",
+                    "Comfort working with state management, data fetching, and component architecture",
+                    "A strong habit of using version control, writing clear documentation, and testing my work"
+                ]
+            }
+        },
+        "card3": {
+            "title": "Product-Minded Collaboration",
+            "content": "I don’t just focus on writing code—I like understanding the bigger picture. Working closely with designers and other developers helps me ship features that make sense for both users and the product.",
+            "prioritiesDetail": {
+                "title": "How I Work",
+                "list": [
+                    "Turning designs and product ideas into polished, production-ready UI",
+                    "Talking through technical decisions and trade-offs with the team",
+                    "Writing clean, readable code that’s easy to pick up and iterate on",
+                    "Learning from feedback and continuously improving both the code and the user experience"
+                ]
+            }
+        }
+    },
+    "projectsSection": {
+        "title": "Projects",
+        "subtitle": "Here are a few highlights of my work. For more details, check out my GitHub or LinkedIn!",
+        "project1": {
+            "title": "Interactive Gamified Website",
+            "description": "This is what you're looking at now! A pixel-art style website featuring an interactive game, built using React, Next.js, and Phaser.js to showcase reusable components, game logic, and responsive design",
+            "toolsUsed": "React, Next.js, TypeScript, Phaser.js, Tailwind CSS, HTML",
+            "image": "gamified-website-screenshot.png",
+            "link": "/gamified"
+        },
+        "project2": {
+            "title": "UW Baja SAE",
+            "description": "I took on the role of Lead Frontend Developer for our design team's website redesign, focusing on responsive UI, reusable components, and ease of use.",
+            "toolsUsed": "React, TypeScript, Tailwind CSS, HTML, Figma",
+            "image": "baja-sae-website-screenshot.png",
+            "link": "https://waterloobaja.ca/"
+        },
+        "project3": {
+            "title": "Intro to Machine Learning",
+            "description": "During Fall 2025, I completed a Study Abroad term in Madrid, Spain. There, I took a course on Machine Learning, where I built projects using Python and popular ML libraries.",
+            "image": "machine-learning-projects-screenshot.png",
+            "link": "https://github.com/avitalpal/ml-fall-2025"
+        },
+        "githubLinkText": "View More of my stuff on GitHub!"
+    },
+    "funFactsSection": {
+        "title": "What else is there to know?",
+        "facts": {
+            "card1": {
+                "subtitle": "I've saved over 4,200 songs on Spotify",
+                "content": "You'll find me wearing earbuds a lot, especially on campus. I'm always looking for new music, so if you have any recommendations, send them my way!"
+            },
+            "card2": {
+                "subtitle": "I can solve a Rubik's Cube in under a minute",
+                "content": "I've been practicing speedcubing for a few years now and can consistently solve the cube in under a minute. It's a fun way to challenge my problem-solving skills :]"
+            },
+            "card3": {
+                "subtitle": "I'm a big fan of maintaining my hobbies",
+                "content": "Whether it be playing hockey, chess, or video games, I always make time for the activities I enjoy. Next up: improving my drawing skills."
+            },
+            "card4": {
+                "subtitle": "I just spent 4 months studying abroad in Spain",
+                "content": "I've been fortunate enough to travel to several countries, but studying in Madrid was a unique experience that allowed me to immerse myself in a new culture while continuing my education. Just don't ask about my Spanish skills, no son buenos :P"
+            }
+        }
+    },
+    "contactSection": {
+        "title": "I'd love to chat! :)",
+        "subtitle": "I'm always open to connecting! Whether you have a question, want to collaborate, or just want to say hi, feel free to reach out.",
+        "emailPrompt": "You can email me at ",
+        "emailAddress": "avital.palchik@uwaterloo.ca",
+        "linkedinPrompt": "or connect with me on ",
+        "linkedinText": "LinkedIn",
+        "linkedinUrl": "https://www.linkedin.com/in/avital-palchik/",
+        "closingRemark": "and don't forget to try out game mode before you go!"
+    }
+}

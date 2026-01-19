@@ -10,7 +10,7 @@ export default function HelpButton() {
         <>
             {/* Question mark button */}
             <button
-                className="fixed left-4 top-4 hover:cursor-pointer px-3 py-1 border-2 border-stone-800 rounded-full shadow-md bg-stone-200 hover:bg-stone-300 transition"
+                className="fixed text-2xl left-4 top-4 hover:cursor-pointer px-4 py-1 border-2 border-stone-800 rounded-full shadow-md bg-stone-200 hover:bg-stone-300 transition"
                 onClick={() => setIsOpen(true)}
             >
                 ?

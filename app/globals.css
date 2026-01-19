@@ -7,6 +7,24 @@
   font-style: normal;
 }
 
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Apply the offset to every section that has an ID */
+section[id] {
+  scroll-margin-top: 5rem; 
+}
+
 .pixel-font {
-  font-family: "PixelFont", monospace;
+  font-family: "PixelFont", Monaco, monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "Courier New";
+}
+
+.monaco-font {
+  font-family: Monaco, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
 }

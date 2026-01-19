@@ -18,14 +18,14 @@ export const INVENTORY_ITEM_REGISTRY: Record<InventoryItemId, InventoryItem> = {
     "inventory/github": {
         name: "inventory/github",
         action: () => {
-            window.open("https://example.com", "_blank");
+            window.open("https://github.com/avitalpal", "_blank");
         },
         description: "visit my GitHub",
     },
     "inventory/linkedin": {
         name: "inventory/linkedin",
         action: () => {
-            window.open("https://example.com", "_blank");
+            window.open("https://www.linkedin.com/in/avital-palchik/", "_blank");
         },
         description: "visit my LinkedIn",
     },
@@ -39,7 +39,18 @@ export const INVENTORY_ITEM_REGISTRY: Record<InventoryItemId, InventoryItem> = {
     "inventory/scroll": {
         name: "inventory/scroll",
         action: () => {
-            window.dispatchEvent(new Event("open-book"));
+            // Create a temporary link element
+            const link = document.createElement('a');
+
+            link.href = '/AvitalPalchikResumeJan2026.pdf';
+
+            // This tells the browser to download instead of navigate
+            link.download = 'My_Resume.pdf';
+
+            // Append, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         },
         description: "download my resume",
     },
