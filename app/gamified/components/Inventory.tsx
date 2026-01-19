@@ -15,8 +15,6 @@ export default function Inventory({
     // Do something with the item
     const item = items[index];
     if (item) {
-      console.log("Selected item:", item);
-      // You could dispatch an event, call a function, or trigger inventory use
       window.dispatchEvent(new CustomEvent("inventory-select", { detail: item }));
     }
   };

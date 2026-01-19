@@ -2,14 +2,15 @@ import * as Phaser from "phaser";
 
 const TILE_SIZE = 32;
 
+type ChestState = "rest" | "hover" | "open" | "closing";
+
 type Journal = {
     id: string;
     sprite: Phaser.Physics.Arcade.Sprite;
     indicator: Phaser.GameObjects.Image;
     opened: boolean;
-    hovering?: boolean; // track hover animation
+    state: ChestState;
 };
-
 
 export default class MainScene extends Phaser.Scene {
     private player!: Phaser.Physics.Arcade.Sprite;
@@ -24,6 +25,29 @@ export default class MainScene extends Phaser.Scene {
 
     // At the top of your MainScene class:
     private isModalOpen: boolean = false;
+
+    private handleModalClose = () => {
+        this.isModalOpen = false;
+
+        this.journals.forEach(j => {
+            if (j.state !== "open") return;
+
+            j.state = "closing";
+
+            this.time.delayedCall(300, () => {
+                j.sprite.play("chest-close");
+
+                j.sprite.once(
+                    Phaser.Animations.Events.ANIMATION_COMPLETE,
+                    () => {
+                        j.sprite.play("chest-rest");
+                        j.opened = false;
+                        j.state = "rest";
+                    }
+                );
+            });
+        });
+    };
 
     constructor() {
         super("MainScene");
@@ -260,16 +284,19 @@ export default class MainScene extends Phaser.Scene {
                 Phaser.Textures.FilterMode.NEAREST
             );
 
-            this.journals.forEach(j => {
-                j.hovering = false;
-            });
-
             this.journals.push({
                 id: j.id,
                 sprite,
                 indicator,
                 opened: false,
+                state: "rest",
             });
+        });
+
+        window.addEventListener("modal-close", this.handleModalClose);
+
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            window.removeEventListener("modal-close", this.handleModalClose);
         });
 
         // Chest idle (resting) frame
@@ -387,7 +414,7 @@ export default class MainScene extends Phaser.Scene {
         }
 
         // Check journal interaction
-        this.journals.forEach((j) => {
+        this.journals.forEach(j => {
             const d = Phaser.Math.Distance.Between(
                 this.player.x,
                 this.player.y,
@@ -395,46 +422,45 @@ export default class MainScene extends Phaser.Scene {
                 j.sprite.y
             );
 
-            j.indicator.setVisible(d < 30);
+            const near = d < 30;
+            j.indicator.setVisible(near && !this.isModalOpen);
 
-            if (d < 30 && !j.opened) {
-                if (!j.hovering) {
-                    j.sprite.play("chest-hover");
-                    j.hovering = true;
-                }
-
-                if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-                    j.sprite.play("chest-open");
-                    j.opened = true;
-
-                    // Wait for animation before opening modal
-                    j.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                        setTimeout(() => {
-                            window.dispatchEvent(new CustomEvent("open-journal", { detail: { id: j.id } }));
-                        }, 100);
-                    });
-                }
-            } else if (d >= 30 && !j.opened) {
-                j.hovering = false;
-                j.sprite.play("chest-rest");
+            // --- HOVER ---
+            if (near && j.state === "rest") {
+                j.sprite.play("chest-hover");
+                j.state = "hover";
             }
 
-            window.addEventListener("modal-close", () => {
-                this.isModalOpen = false;
+            // --- LEAVE ---
+            if (!near && j.state === "hover") {
+                j.sprite.play("chest-rest");
+                j.state = "rest";
+            }
 
-                this.journals.forEach(j => {
-                    if (j.opened) {
-                        setTimeout(() => {
-                            j.sprite.play("chest-close");
-                            j.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                                j.sprite.play("chest-rest");
-                                j.opened = false;
-                            });
-                        }, 500);
+            // --- OPEN ---
+            if (
+                near &&
+                j.state === "hover" &&
+                Phaser.Input.Keyboard.JustDown(this.interactKey)
+            ) {
+                j.state = "open";
+                j.opened = true;
+
+                j.sprite.play("chest-open");
+
+                j.sprite.once(
+                    Phaser.Animations.Events.ANIMATION_COMPLETE,
+                    () => {
+                        this.time.delayedCall(100, () => {
+                            window.dispatchEvent(
+                                new CustomEvent("open-journal", {
+                                    detail: { id: j.id },
+                                })
+                            );
+                        });
                     }
-                });
-            });
-
+                );
+            }
         });
 
     }
