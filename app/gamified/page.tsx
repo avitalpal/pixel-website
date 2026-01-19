@@ -32,7 +32,7 @@ export default function GamifiedPage() {
     const [showCompletionModal, setShowCompletionModal] = useState(false);
 
     const TOTAL_EGGS = 3;
-    const TOTAL_JOURNALS = 4;
+    const TOTAL_JOURNALS = 7;
 
     useEffect(() => {
         const handler = (e: Event) => {

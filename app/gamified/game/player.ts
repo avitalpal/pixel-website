@@ -1,4 +1,6 @@
 import * as Phaser from "phaser";
+import House from "../components/House";
+import ChickenHouse from "../components/ChickenHouse";
 
 const TILE_SIZE = 32;
 
@@ -7,7 +9,7 @@ type ChestState = "rest" | "hover" | "open" | "closing";
 type Journal = {
     id: string;
     sprite: Phaser.Physics.Arcade.Sprite;
-    indicator: Phaser.GameObjects.Image;
+    indicator: Phaser.GameObjects.Container;
     opened: boolean;
     state: ChestState;
 };
@@ -49,6 +51,14 @@ export default class MainScene extends Phaser.Scene {
         });
     };
 
+
+    private createPath = (x: number, y: number, frame: string) => {
+        const path = this.add.sprite(x, y, "path", frame);
+        path.setDepth(1);
+        (path as any).isPath = true;
+        return path;
+    };
+
     constructor() {
         super("MainScene");
     }
@@ -75,21 +85,23 @@ export default class MainScene extends Phaser.Scene {
             frameHeight: 48,
         });
 
-        // Tilesets
-        this.load.image(
-            "grassTiles",
-            "/tilesets/Grass.png"
-        );
-
-        this.load.image(
-            "waterTiles",
-            "/tilesets/Water.png"
-        );
-
         this.load.image("keyE", "/fonts/E.png");
 
         // Tilemap
         this.load.tilemapTiledJSON("gameMap", "/maps/gameMap3.json");
+
+        this.load.spritesheet("house", "/premade/premade_buildings_demo.png", {
+            frameWidth: 16,   // adjust if needed
+            frameHeight: 16,
+        });
+
+        this.load.spritesheet("path", "/objects/Paths.png", {
+            frameWidth: 16,   // adjust if needed
+            frameHeight: 16,
+        }
+        )
+
+        this.load.image("chicken-house", "/objects/Free_Chicken_House.png");
 
         // Tilesets
         this.load.image("Grass", "/tilesets/Grass.png");
@@ -188,8 +200,6 @@ export default class MainScene extends Phaser.Scene {
 
         this.textures.get("player").setFilter(Phaser.Textures.FilterMode.NEAREST);
 
-        // COLLISION
-
         // --- Corrected Animations ---
         this.anims.create({
             key: "idle",
@@ -233,6 +243,51 @@ export default class MainScene extends Phaser.Scene {
             repeat: 0
         });
 
+        // --- House ---
+        const houseTex = this.textures.get("house");
+
+        const pathTex = this.textures.get("path");
+
+        houseTex.add("house-small", 0, 33, 37, 94, 123);
+        houseTex.add("house-medium", 0, 161, 29, 158, 131);
+        houseTex.add("house-large", 0, 17, 181, 190, 123);
+
+        pathTex.add("path-long", 0, 0, 0, 16, 32);
+        pathTex.add("path-short", 0, 0, 8, 16, 16);
+
+        houseTex.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        pathTex.setFilter(Phaser.Textures.FilterMode.NEAREST);
+
+        // 3. Spawn them as separate sprites
+        const house1 = new House(this, 200, 1000, "house-small");
+        this.createPath(220, 1010, "path-short");
+        const house2 = new House(this, 650, 250, "house-medium");
+        this.createPath(620, 265, "path-long");
+        const house3 = new House(this, 1000, 1100, "house-large");
+        this.createPath(1000, 1115, "path-long");
+        const house4 = new House(this, 130, 600, "house-small");
+        this.createPath(145, 615, "path-long");
+        const house5 = new House(this, 95, 150, "house-medium");
+        this.createPath(65, 165, "path-long");
+        const house6 = new House(this, 1150, 80, "house-large");
+        this.createPath(1150, 90, "path-short");
+        const house7 = new House(this, 620, 1100, "house-medium");
+        this.createPath(590, 1115, "path-long");
+
+        // Optional: collide with player
+        this.physics.add.collider(this.player, house1);
+        this.physics.add.collider(this.player, house2);
+        this.physics.add.collider(this.player, house3);
+        this.physics.add.collider(this.player, house4);
+        this.physics.add.collider(this.player, house5);
+        this.physics.add.collider(this.player, house6);
+        this.physics.add.collider(this.player, house7);
+
+        // --- Chicken House ---
+        const chickenHouse = new ChickenHouse(this, 500, 600);
+        this.physics.add.collider(this.player, chickenHouse);
+
+        this.player.setDepth(this.player.y);
 
         // --- Gems ---
         const gemPositions = [
@@ -244,7 +299,6 @@ export default class MainScene extends Phaser.Scene {
             const gem = this.physics.add.sprite(pos.x, pos.y, "egg");
             gem.setTint(0x38bdf8);
             gem.setImmovable(true);
-            gem.setDepth(2);
             (gem as any).itemName = pos.name;
 
             this.gems.push(gem);
@@ -259,35 +313,51 @@ export default class MainScene extends Phaser.Scene {
             });
         });
 
-
         // --- Journals ---
+        // Chest idle (resting) frame
+        this.anims.create({
+            key: "chest-rest",
+            frames: [{ key: "chest", frame: 1 }],
+        });
+
         const positions = [
-            { id: "j1", x: worldWidth / 2 + 100, y: worldHeight / 2 },
-            { id: "j2", x: worldWidth / 2 + 300, y: worldHeight / 2 + 50 },
-            { id: "j3", x: worldWidth / 2 - 200, y: worldHeight / 2 - 100 },
-            { id: "j4", x: worldWidth / 2 - 300, y: worldHeight / 2 + 200 },
+            { id: "hj1", x: 184, y: 1000 },  // house1
+            { id: "hj2", x: 642, y: 250 },   // house2
+            { id: "hj3", x: 1050, y: 1100 }, // house3
+            { id: "hj4", x: 114, y: 600 },   // house4
+            { id: "hj5", x: 88, y: 150 },    // house5
+            { id: "hj6", x: 1100, y: 80 },  // house6
+            { id: "hj7", x: 612, y: 1100 },  // house7
         ];
+
+        this.textures.get("keyE").setFilter(Phaser.Textures.FilterMode.NEAREST);
 
         positions.forEach((j) => {
             const sprite = this.physics.add.sprite(j.x, j.y, "chest");
-            sprite.setDepth(2);
             sprite.setImmovable(true);
             sprite.setTint(0xfacc15);
-            sprite.play("chest-rest"); // start resting frame
+            sprite.play("chest-rest");
 
-            const indicator = this.add
-                .image(j.x, j.y - 24, "keyE")
-                .setOrigin(0.5)
-                .setVisible(false)
-                .setDepth(2)
-            this.textures.get("keyE").setFilter(
-                Phaser.Textures.FilterMode.NEAREST
-            );
+            // 1. Create the Background (Rectangle)
+            const bgW = 15; // Width of background
+            const bgH = 15; // Height of background
+            const bg = this.add.graphics();
+            bg.fillStyle(0x000000, 0.7); // Black color, 70% opacity
+            bg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4); // Centered rectangle
+
+            // 2. Create the Key Image
+            const keyImg = this.add.image(0, 0, "keyE").setOrigin(0.5);
+
+            // 3. Put them in a Container
+            // Position the container where the indicator used to be (j.y - 24)
+            const indicatorContainer = this.add.container(j.x, j.y - 16, [bg, keyImg]);
+            indicatorContainer.setVisible(false);
+            indicatorContainer.setDepth(10000); // Keep it above everything
 
             this.journals.push({
                 id: j.id,
                 sprite,
-                indicator,
+                indicator: indicatorContainer as any, // Cast to any or update Journal type
                 opened: false,
                 state: "rest",
             });
@@ -299,11 +369,7 @@ export default class MainScene extends Phaser.Scene {
             window.removeEventListener("modal-close", this.handleModalClose);
         });
 
-        // Chest idle (resting) frame
-        this.anims.create({
-            key: "chest-rest",
-            frames: [{ key: "chest", frame: 1 }],
-        });
+
 
         // Chest "near player" blink/hover (switch 0 <-> 1)
         this.anims.create({
@@ -354,7 +420,6 @@ export default class MainScene extends Phaser.Scene {
         const egg = this.physics.add.sprite(x, y, "egg");
         egg.setTint(0xf472b6);
         egg.setImmovable(true);
-        egg.setDepth(2);
 
         this.physics.add.overlap(this.player, egg, () => {
             window.dispatchEvent(new Event("collect-egg"));
@@ -412,6 +477,18 @@ export default class MainScene extends Phaser.Scene {
             this.player.play(animToPlay, true);
             this.currentAnim = animToPlay;
         }
+
+        this.children.each(child => {
+            // 1. Dynamic Depth Sorting for all sprites
+            this.children.each(child => {
+                if (child instanceof Phaser.GameObjects.Sprite && !(child as any).isPath) {
+                    // We set depth to Y so that items lower on screen are "closer"
+                    child.setDepth(child.y);
+                }
+            });
+            // 2. Force the Player and Chests to be slightly in front if at the exact same Y
+            this.player.setDepth(this.player.y + 1);
+        });
 
         // Check journal interaction
         this.journals.forEach(j => {
