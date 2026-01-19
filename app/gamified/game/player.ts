@@ -1,6 +1,8 @@
 import * as Phaser from "phaser";
 import House from "../components/House";
 import ChickenHouse from "../components/ChickenHouse";
+import Cows from "../components/Cow";
+import Chickens from "../components/Chicken";
 
 const TILE_SIZE = 32;
 
@@ -111,6 +113,17 @@ export default class MainScene extends Phaser.Scene {
         this.load.image("Wooden_House_Walls_Tilset", "/tilesets/Wooden_House_Walls_Tilset.png");
         this.load.image("Tilled_Dirt", "/tilesets/Tilled_Dirt.png");
         this.load.image("Tilled Dirt", "/tilesets/Tilled Dirt.png");
+
+        // Animals
+        this.load.spritesheet("chicken", "/characters/Free Chicken Sprites.png", {
+            frameWidth: 16,
+            frameHeight: 16,
+        });
+
+        this.load.spritesheet("cow", "/characters/Free Cow Sprites.png", {
+            frameWidth: 32,
+            frameHeight: 32,
+        });
 
     }
 
@@ -283,11 +296,38 @@ export default class MainScene extends Phaser.Scene {
         this.physics.add.collider(this.player, house6);
         this.physics.add.collider(this.player, house7);
 
-        // --- Chicken House ---
-        const chickenHouse = new ChickenHouse(this, 500, 600);
-        this.physics.add.collider(this.player, chickenHouse);
+        // --- Chicken Houses ---
+        const chickenCoops = [
+            { x: 500, y: 600 },
+            { x: 300, y: 500 },
+            { x: 900, y: 700 },
+            { x: 400, y: 200 },
+        ];
+
+        const chickenHouseSprites: Phaser.GameObjects.GameObject[] = [];
+
+        for (const coop of chickenCoops) {
+            const chickenHouse = new ChickenHouse(this, coop.x, coop.y);
+            this.physics.add.collider(this.player, chickenHouse);
+
+            // push the actual sprite to the array
+            chickenHouseSprites.push(chickenHouse);
+        }
 
         this.player.setDepth(this.player.y);
+
+        // --- Animals ---
+        
+        const collidables: (Phaser.Tilemaps.TilemapLayer | Phaser.GameObjects.GameObject)[] = [
+            boundariesLayer!,          // tile collision
+            house1, house2, house3, house4, house5, house6, house7,
+            ...chickenHouseSprites     // actual GameObjects, not `{x,y}`
+        ];
+
+        // Spawn cows
+        new Cows(this, 12, collidables); // spawn cows randomly
+        // Spawn chickens
+        new Chickens(this, 20, collidables); // spawn chickens randomly
 
         // --- Gems ---
         const gemPositions = [
