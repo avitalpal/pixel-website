@@ -23,14 +23,14 @@ export default function WebsitePage() {
         <a
           href="/AvitalPalchikResumeJan2026.pdf"
           download
-          className="inline-flex items-center gap-2 outline-2 outline-offset-4 outline-blue-600 bg-blue-100 hover:bg-blue-500 text-stone-800 font-semibold px-6 py-3 rounded-lg transition-colors duration-300 mb-12"
+          className="inline-flex items-center gap-2 outline-2 outline-offset-4 outline-blue-600 bg-blue-100 hover:bg-blue-500 text-stone-800 font-semibold px-6 py-3 rounded-lg transition-colors duration-300 mt-8 md:mt-0 md:mb-12"
         >
           <span>📥</span>
           Download Resume
         </a>
 
         {/* Summary Section */}
-        <div className="max-w-3xl mx-auto mt-12 md:mt-16 space-y-6 text-left">
+        <div className="max-w-3xl px-8 md:mx-auto mt-12 md:mt-16 space-y-6 text-left">
           {/* Part 1 & 2 */}
           <div className="space-y-4">
             <p className="text-stone-700 leading-relaxed text-sm md:text-base">

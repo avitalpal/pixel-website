@@ -93,9 +93,9 @@ export default function GamifiedPage() {
 
     if (!isLargeScreen) {
         return (
-            <div className="md:hidden min-h-screen flex flex-col gap-8 items-center justify-center bg-stone-100 text-center px-6">
+            <div className="lg:hidden min-h-screen flex flex-col gap-8 items-center justify-center bg-stone-100 text-center px-6">
                 <p className="pixel-font text-stone-700">
-                    Game mode isn't available on mobile right now, sorry!
+                    Game mode is only available on larger screen sizes right now, sorry!
                 </p>
                 <SwitchSite destination="website" />
             </div>
@@ -146,6 +146,7 @@ export default function GamifiedPage() {
                     }}
                 >
                     <p>You found all the Easter eggs 👀</p>
+                    <p>I guess now I can tell you that this website isn't done just yet! More features and map content coming soon, so be ready :]</p>
                 </Modal>
             )}
 
