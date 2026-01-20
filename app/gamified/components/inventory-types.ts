@@ -45,7 +45,7 @@ export const INVENTORY_ITEM_REGISTRY: Record<InventoryItemId, InventoryItem> = {
             link.href = '/AvitalPalchikResumeJan2026.pdf';
 
             // This tells the browser to download instead of navigate
-            link.download = 'My_Resume.pdf';
+            link.download = 'AvitalPalchik_Resume.pdf';
 
             // Append, click, and remove
             document.body.appendChild(link);
