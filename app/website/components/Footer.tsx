@@ -77,7 +77,7 @@ export default function Footer({ data }: { data: ContactProps }) {
 
         {/* Closing Remark */}
         <div className="text-center mt-6 pt-6 border-t-2 border-blue-200">
-          <p className="italic text-stone-600 text-md">
+          <p className="hidden lg:block italic text-stone-600 text-md">
             {data.closingRemark}
           </p>
         </div>

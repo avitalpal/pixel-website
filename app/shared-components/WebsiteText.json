@@ -69,7 +69,7 @@
         "subtitle": "Here are a few highlights of my work. For more details, check out my ",
         "project1": {
             "title": "Gamified Website",
-            "description": "This is what you're looking at now! A pixel-art style website featuring an interactive game, built using React, Next.js, and Phaser.js to showcase reusable components, game logic, and responsive design",
+            "description": "This is what you're looking at now if you're on a larger screen! A pixel-art style website featuring an interactive game, built using React, Next.js, and Phaser.js to showcase reusable components, game logic, and responsive design",
             "toolsUsed": "React, Next.js, TypeScript, Phaser.js, Tailwind CSS, HTML",
             "image": "/projects/gamified-website-screenshot.png",
             "link": "/gamified"
